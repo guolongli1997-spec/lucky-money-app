@@ -62,6 +62,13 @@ async function handleChatRequest(
 			messages: ChatMessage[];
 		};
 
+		if (!Array.isArray(messages)) {
+			return new Response(JSON.stringify({ error: "Invalid messages" }), {
+				status: 400,
+				headers: { "content-type": "application/json" },
+			});
+		}
+
 		// Add system prompt if not present
 		if (!messages.some((msg) => msg.role === "system")) {
 			messages.unshift({ role: "system", content: SYSTEM_PROMPT });
