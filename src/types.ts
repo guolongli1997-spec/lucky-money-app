@@ -9,7 +9,7 @@ export interface Env {
 	AI: Ai;
 
 	/**
-	 * Binding for static assets.
+	 * Binding for static assets (the /public folder).
 	 */
 	ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
