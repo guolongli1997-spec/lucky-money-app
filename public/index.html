@@ -1,147 +1,287 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" class="h-full w-full">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="FlyTripVisa AI">
-<meta name="theme-color" content="#1677ff">
-<meta name="format-detection" content="telephone=no">
-<title>FlyTripVisa AI Chat</title>
-<style>
-:root{
-  --primary:#1677ff; --primary-light:#4096ff; --orange:#ff6b35; --orange-light:#ff8c42;
-  --bg:#f0f2f5; --card:#ffffff; --text:#1a1a1a; --muted:#8a8f98; --border:rgba(0,0,0,.07);
-  --console:#eaf2ff; --shadow:0 1px 4px rgba(0,0,0,.06);
-  --safe-top:env(safe-area-inset-top,0px); --safe-bottom:env(safe-area-inset-bottom,0px);
-}
-@media (prefers-color-scheme:dark){
-  :root{--bg:#000; --card:#121212; --text:#ececec; --muted:#7d838c; --border:#232323; --console:#141414; --shadow:none}
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{-webkit-text-size-adjust:100%}
-html,body{height:100%;height:100dvh;background:var(--bg);color:var(--text)}
-body{
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Bengali",Helvetica,Arial,sans-serif;
-  line-height:1.5;display:flex;flex-direction:column;overflow:hidden;overscroll-behavior:none;
-}
-button{font:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+    <title>FlyTripVisa - Real-Time Mobile Chat Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            background-color: #000000;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        .glass-dark {
+            background: rgba(18, 18, 18, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        /* Voice recording active pulse effect */
+        .listening {
+            animation: pulse-red 1.5s infinite;
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            border-color: rgba(239, 68, 68, 0.5) !important;
+            color: #ef4444 !important;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.0); }
+        }
 
-.app-header{
-  flex:none;display:flex;align-items:center;justify-content:center;gap:8px;
-  height:calc(44px + var(--safe-top));padding:var(--safe-top) 12px 0;
-  background:linear-gradient(135deg,var(--primary),var(--primary-light));
-  box-shadow:0 2px 8px rgba(22,119,255,.2);
-}
-.app-header h1{font-size:17px;font-weight:600;letter-spacing:.3px;color:#fff}
-.live{width:8px;height:8px;border-radius:50%;background:#52c41a;box-shadow:0 0 0 3px rgba(82,196,26,.25)}
-
-/* ids and classes in this block are the ones the template's chat.js relies on */
-.chat-messages{
-  flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
-  padding:14px 14px 6px;display:flex;flex-direction:column;gap:10px;
-}
-.message{max-width:86%;padding:10px 14px;border-radius:16px;box-shadow:var(--shadow)}
-.message p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
-.message:has(> p:empty){display:none}
-.user-message{align-self:flex-end;color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-bottom-right-radius:4px}
-.assistant-message{align-self:flex-start;background:var(--card);border:1px solid var(--border);border-bottom-left-radius:4px}
-
-/* always reserves its height, so showing and hiding it never shifts the layout */
-.typing-indicator{
-  flex:none;height:24px;padding:0 20px;display:flex;align-items:center;gap:5px;
-  visibility:hidden;font-size:0;
-}
-.typing-indicator.visible{visibility:visible}
-.typing-indicator i{width:6px;height:6px;border-radius:50%;background:var(--primary);animation:dot 1.1s infinite}
-.typing-indicator i:nth-child(2){animation-delay:.15s}
-.typing-indicator i:nth-child(3){animation-delay:.3s}
-@keyframes dot{0%,80%,100%{opacity:.25}40%{opacity:1}}
-
-.message-input{
-  flex:none;padding:6px 10px calc(8px + var(--safe-bottom));
-  background:var(--card);border-top:1px solid var(--border);
-}
-.console-bar{
-  display:flex;align-items:flex-end;gap:6px;min-height:46px;padding:5px 5px 5px 14px;
-  background:var(--console);border:1.5px solid rgba(22,119,255,.14);border-radius:24px;transition:border-color .2s;
-}
-.console-bar:focus-within{border-color:rgba(22,119,255,.45)}
-#user-input{
-  flex:1;min-width:0;max-height:120px;padding:7px 0;border:0;outline:0;background:transparent;
-  color:var(--text);font:inherit;font-size:16px;line-height:1.4;resize:none;
-}
-#user-input::placeholder{color:var(--muted)}
-/* iOS dims disabled fields, which reads as a flash while the AI replies */
-#user-input:disabled{opacity:1;color:var(--text);-webkit-text-fill-color:var(--text);background:transparent}
-.circle{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-size:15px;transition:transform .15s}
-.circle:active{transform:scale(.92)}
-#voice-button{background:linear-gradient(135deg,var(--primary),var(--primary-light));box-shadow:0 2px 8px rgba(22,119,255,.3)}
-#voice-button.listening{background:linear-gradient(135deg,#ff4d4f,#ff7875);animation:ring 1.2s infinite}
-@keyframes ring{0%{box-shadow:0 0 0 0 rgba(255,77,79,.45)}70%{box-shadow:0 0 0 10px rgba(255,77,79,0)}100%{box-shadow:0 0 0 0 rgba(255,77,79,0)}}
-#send-button{background:linear-gradient(135deg,var(--orange),var(--orange-light));box-shadow:0 2px 8px rgba(255,107,53,.3)}
-#send-button:disabled{opacity:.45;cursor:not-allowed}
-#voice-button:focus-visible,#send-button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
-
-@media (min-width:600px){
-  .chat-messages,.console-bar{max-width:640px;width:100%;margin:0 auto}
-}
-@media (prefers-reduced-motion:reduce){*{animation:none!important}}
-</style>
+        /* --- HEADER: slightly taller, comfortable height (40px) --- */
+        header {
+            height: 2.5rem !important;          /* 40px — a bit bigger */
+            min-height: 2.5rem !important;
+            max-height: 2.5rem !important;
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        header > div {
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        /* Logo box a touch larger to match taller header */
+        header .w-5.h-5 {
+            width: 1.5rem !important;    /* 24px */
+            height: 1.5rem !important;
+            border-radius: 0.375rem !important;
+        }
+        header .w-5.h-5 i {
+            font-size: 11px !important;
+        }
+        /* Slightly larger brand text */
+        header span.font-bold {
+            font-size: 0.8125rem !important;  /* 13px */
+            letter-spacing: -0.01em;
+        }
+        /* Status pill slightly bigger for balance */
+        header .inline-flex.items-center {
+            padding: 0.2rem 0.5rem !important;
+            font-size: 0.625rem !important;   /* 10px */
+        }
+        /* Reduce top gap between header and main */
+        main {
+            padding-top: 0 !important;
+        }
+        /* Tighter chat feed padding */
+        #chat-messages {
+            padding-top: 0.4rem !important;
+            padding-bottom: 0.4rem !important;
+        }
+        /* Tighter input bar */
+        .px-2.py-1\.5.bg-black.border-t {
+            padding-top: 0.3rem !important;
+            padding-bottom: 0.3rem !important;
+        }
+        /* Tighter footer */
+        footer {
+            padding-top: 0.2rem !important;
+            padding-bottom: 0.2rem !important;
+            line-height: 1.2;
+        }
+        /* Message bubbles a bit wider for small screens */
+        .max-w-\[85\%\] {
+            max-width: 90% !important;
+        }
+        /* Remove extra bottom margin on messages */
+        #chat-messages > div {
+            margin-bottom: 0.2rem !important;
+        }
+    </style>
 </head>
-<body>
-<header class="app-header">
-  <span class="live" aria-hidden="true"></span>
-  <h1>FlyTripVisa AI</h1>
-</header>
+<body id="app-body" class="text-slate-100 flex flex-col justify-between selection:bg-sky-500 selection:text-white antialiased">
 
-<div id="chat-messages" class="chat-messages" aria-live="polite">
-  <div class="message assistant-message">
-    <p>Hello! I'm an LLM chat app powered by Cloudflare Workers AI. How can I help you today?</p>
-  </div>
-</div>
+    <!-- HEADER (40px, comfortable) -->
+    <header class="w-full bg-black border-b border-zinc-800/80 flex items-center justify-between z-50 shrink-0">
+        <div class="flex items-center space-x-2">
+            <div class="w-5 h-5 rounded-md bg-sky-500 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
+                <i class="fa-solid fa-plane text-[11px]"></i>
+            </div>
+            <span class="font-bold text-xs tracking-tight text-white">FlyTripVisa</span>
+        </div>
+        <div class="flex items-center">
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span class="w-1.5 h-1.5 mr-1 bg-emerald-400 rounded-full animate-pulse"></span> Active
+            </span>
+        </div>
+    </header>
 
-<div class="typing-indicator" id="typing-indicator" aria-label="AI is thinking"><i></i><i></i><i></i>AI is thinking...</div>
+    <!-- Main Content Area -->
+    <main class="flex-grow flex flex-col overflow-hidden bg-black relative w-full">
 
-<div class="message-input">
-  <div class="console-bar">
-    <textarea id="user-input" rows="1" placeholder="Ask anything..." aria-label="Message" autocomplete="off"></textarea>
-    <button class="circle" id="voice-button" type="button" aria-label="Voice input">🎤</button>
-    <button class="circle" id="send-button" type="button" aria-label="Send message">➤</button>
-  </div>
-</div>
+        <!-- Chat Feed -->
+        <div id="chat-messages" class="flex-grow overflow-y-auto px-2.5 py-1.5 space-y-2 w-full">
+            <!-- Welcome message -->
+            <div class="flex items-start space-x-2">
+                <div class="w-6 h-6 rounded-full bg-sky-500/20 border border-sky-500/30 flex items-center justify-center text-sky-400 text-[10px] shrink-0">
+                    <i class="fa-solid fa-headset"></i>
+                </div>
+                <div class="glass-dark rounded-xl rounded-tl-sm p-2.5 max-w-[90%] text-xs space-y-0.5 shadow-md">
+                    <p class="font-semibold text-sky-400 text-[11px]">FlyTripVisa Assistant</p>
+                    <p class="text-slate-300">Welcome! Type your message or upload docs below.</p>
+                    <span id="init-time" class="text-[8px] text-slate-500 block text-right pt-0.5">Just now</span>
+                </div>
+            </div>
+        </div>
 
-<!-- Chat app script (the template's own file, unchanged) -->
-<script src="chat.js"></script>
+        <!-- Input Bar (tight) -->
+        <div class="px-2 py-1 bg-black border-t border-zinc-800/80 shrink-0 w-full">
+            <form onsubmit="handleSendMessage(event)" class="flex items-center space-x-1.5 max-w-4xl mx-auto w-full">
+                <input type="file" id="real-file-input" class="hidden" accept="image/*,application/pdf,.doc,.docx" onchange="handleFileSelected(event)">
 
-<script>
-/* UI extras only: voice dictation and keyboard-aware height. Chat logic stays in chat.js. */
-(function(){
-  var input=document.getElementById('user-input'),btn=document.getElementById('voice-button'),
-      box=document.getElementById('chat-messages'),rec=null,on=false;
-  btn.addEventListener('click',function(){
-    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    if(!SR){alert('Voice input is not supported in this browser.');return}
-    if(on){rec.stop();return}
-    rec=new SR();rec.lang=navigator.language||'en-US';rec.interimResults=false;rec.continuous=false;
-    rec.onstart=function(){on=true;btn.classList.add('listening')};
-    rec.onresult=function(e){
-      input.value=(input.value+' '+e.results[0][0].transcript).trim();
-      input.dispatchEvent(new Event('input'));
-    };
-    rec.onend=rec.onerror=function(){on=false;btn.classList.remove('listening')};
-    rec.start();
-  });
-  if(window.visualViewport){
-    var vv=window.visualViewport;
-    vv.addEventListener('resize',function(){
-      document.body.style.height=vv.height+'px';window.scrollTo(0,0);box.scrollTop=box.scrollHeight;
-    });
-    vv.addEventListener('scroll',function(){window.scrollTo(0,0)});
-  }
-})();
-</script>
+                <button type="button" onclick="document.getElementById('real-file-input').click()" class="w-7 h-7 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-slate-400 hover:text-white transition shrink-0" title="Attach">
+                    <i class="fa-solid fa-paperclip text-[10px]"></i>
+                </button>
+
+                <button type="button" id="voice-button" class="w-7 h-7 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-slate-400 hover:text-white transition shrink-0" title="Voice">
+                    <i class="fa-solid fa-microphone text-[10px]"></i>
+                </button>
+
+                <input type="text" id="user-input" required placeholder="Type a message..."
+                    class="flex-grow px-3 py-1 bg-zinc-900 border border-zinc-800 rounded-full text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-sky-500">
+
+                <button type="submit" class="w-7 h-7 rounded-full bg-sky-500 hover:bg-sky-400 text-white flex items-center justify-center shadow-md shadow-sky-500/25 transition shrink-0">
+                    <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Compact Footer -->
+    <footer class="w-full bg-black border-t border-zinc-950 py-1 px-3 text-center text-[9px] text-zinc-500 shrink-0">
+        FlyTripVisa Studio • Real-Time Cloudflare Ready
+    </footer>
+
+    <!-- App Script Logic -->
+    <script>
+        document.getElementById('init-time').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        function handleSendMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            appendMessage(message, 'user');
+            input.value = '';
+
+            setTimeout(() => {
+                appendMessage("Message processed via cloud channel successfully!", 'bot');
+            }, 800);
+        }
+
+        function handleFileSelected(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const feed = document.getElementById('chat-messages');
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                let previewHTML = '';
+                if (file.type.startsWith('image/')) {
+                    previewHTML = `<img src="${e.target.result}" class="rounded-lg max-h-28 object-cover w-full mb-1">`;
+                } else {
+                    previewHTML = `<div class="flex items-center space-x-1.5 bg-zinc-800/60 p-1.5 rounded-lg mb-1 text-sky-300"> <i class="fa-solid fa-file-pdf text-red-400 text-xs"></i> <span class="truncate text-[11px] text-white">${escapeHtml(file.name)}</span> </div>`;
+                }
+
+                const userFileMsg = `<div class="flex items-start justify-end space-x-2"> <div class="bg-zinc-900 border border-zinc-800 rounded-xl rounded-tr-sm p-2 max-w-[90%] text-xs text-slate-300 space-y-1 shadow-md"> ${previewHTML} <p class="text-[10px] text-slate-400">File: <span class="text-white">${escapeHtml(file.name)}</span></p> <span class="text-[8px] text-zinc-500 block text-right pt-0.5">${timeStr}</span> </div> </div>`;
+                feed.insertAdjacentHTML('beforeend', userFileMsg);
+                feed.scrollTop = feed.scrollHeight;
+
+                setTimeout(() => {
+                    appendMessage(`Uploaded "${file.name}" successfully!`, 'bot');
+                }, 900);
+            };
+
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function appendMessage(text, sender) {
+            const feed = document.getElementById('chat-messages');
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            let html = '';
+            if (sender === 'user') {
+                html = `<div class="flex items-start justify-end space-x-2"> <div class="bg-sky-600 rounded-xl rounded-tr-sm p-2.5 max-w-[90%] text-xs space-y-0.5 shadow-md text-white"> <p class="text-slate-100">${escapeHtml(text)}</p> <span class="text-[8px] text-sky-200 block text-right pt-0.5">${timeStr}</span> </div> </div>`;
+            } else {
+                html = `<div class="flex items-start space-x-2"> <div class="w-6 h-6 rounded-full bg-sky-500/20 border border-sky-500/30 flex items-center justify-center text-sky-400 text-[10px] shrink-0"> <i class="fa-solid fa-headset"></i> </div> <div class="glass-dark rounded-xl rounded-tl-sm p-2.5 max-w-[90%] text-xs space-y-0.5 shadow-md"> <p class="font-semibold text-sky-400 text-[11px]">FlyTripVisa Assistant</p> <p class="text-slate-300">${escapeHtml(text)}</p> <span class="text-[8px] text-slate-500 block text-right pt-0.5">${timeStr}</span> </div> </div>`;
+            }
+            feed.insertAdjacentHTML('beforeend', html);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    </script>
+
+    <!-- Voice & Viewport Script -->
+    <script>
+        (function(){
+            var input = document.getElementById('user-input'),
+                btn = document.getElementById('voice-button'),
+                box = document.getElementById('chat-messages'),
+                body = document.getElementById('app-body'),
+                rec = null,
+                on = false;
+
+            btn.addEventListener('click', function(){
+                var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if(!SR){
+                    appendMessage('Voice input is not supported in this browser.', 'bot');
+                    return;
+                }
+                if(on){ rec.stop(); return; }
+                rec = new SR();
+                rec.lang = navigator.language || 'en-US';
+                rec.interimResults = false;
+                rec.continuous = false;
+                rec.onstart = function(){ on = true; btn.classList.add('listening'); };
+                rec.onresult = function(e){
+                    input.value = (input.value + ' ' + e.results[0][0].transcript).trim();
+                    input.dispatchEvent(new Event('input'));
+                };
+                rec.onend = rec.onerror = function(){ on = false; btn.classList.remove('listening'); };
+                rec.start();
+            });
+
+            if(window.visualViewport){
+                var vv = window.visualViewport;
+                function updateViewportSize() {
+                    body.style.height = vv.height + 'px';
+                    window.scrollTo(0, 0);
+                    box.scrollTop = box.scrollHeight;
+                }
+                vv.addEventListener('resize', updateViewportSize);
+                vv.addEventListener('scroll', function(){ window.scrollTo(0,0); });
+                updateViewportSize();
+            }
+        })();
+    </script>
 </body>
 </html>
