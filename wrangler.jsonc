@@ -16,7 +16,17 @@
 		"enabled": true
 	},
 	"ai": {
-		"binding": "AI"
-	},
-	"upload_source_maps": true
-}
+    "binding": "AI"
+  },
+  "unsafe": {
+    "bindings": [
+      {
+        "name": "namespace",
+        "type": "ai_search_namespace",
+        "namespace": "default"
+      },
+      {
+        "name": "Search",
+        "type": "ai_search",
+        "instance_name": "flyai"
+      }
