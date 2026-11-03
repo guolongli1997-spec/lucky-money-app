@@ -1,41 +1,31 @@
 /**
- * For more details on how to configure Wrangler, refer to:
+ * Cloudflare Workers configuration
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "lucky-money-app",
-	"main": "src/index.ts",
-	"compatibility_date": "2025-10-08",
-	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
-	"assets": {
-		"binding": "ASSETS",
-		"directory": "./public"
-	},
-	"observability": {
-		"enabled": true
-	}, 
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lucky-money-app",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-10-08",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./public"
+  },
+
+  "observability": {
+    "enabled": true
+  },
 
   "ai": {
     "binding": "AI"
   },
+
   "d1_databases": [
     {
       "binding": "D1",
       "database_id": "a49b13c8-e420-48b4-8967-f9752e1bc5fa"
     }
-  ],
-  "unsafe": {
-    "bindings": [
-      {
-        "name": "namespace",
-        "type": "ai_search_namespace",
-        "namespace": "default"
-      },
-      {
-        "name": "Search",
-        "type": "ai_search",
-        "instance_name": "flyai"
-      }
-    ]
-  },
+  ]
+}
