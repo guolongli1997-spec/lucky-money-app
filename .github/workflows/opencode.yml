@@ -5,35 +5,40 @@ on:
     types: [created]
   pull_request_review_comment:
     types: [created]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
 
 jobs:
   opencode:
     if: |
+      github.event_name == 'workflow_dispatch' ||
       (
-        contains(github.event.comment.body, '/oc') ||
-        contains(github.event.comment.body, '/opencode')
-      ) &&
-      (
-        github.event.comment.author_association == 'OWNER' ||
-        github.event.comment.author_association == 'MEMBER' ||
-        github.event.comment.author_association == 'COLLABORATOR'
+        (
+          contains(github.event.comment.body, '/oc') ||
+          contains(github.event.comment.body, '/opencode')
+        ) &&
+        (
+          github.event.comment.author_association == 'OWNER' ||
+          github.event.comment.author_association == 'MEMBER' ||
+          github.event.comment.author_association == 'COLLABORATOR'
+        )
       )
 
     runs-on: ubuntu-latest
 
-    permissions:
-      id-token: write
-      contents: read
-
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           fetch-depth: 1
-          persist-credentials: false
 
       - name: Run OpenCode AI Agent
-        uses: anomalyco/opencode/github@latest
+        uses: anomalyco/opencode/github@59e95cc5394b7714451608099ef4db7bffc904b6
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         with:
